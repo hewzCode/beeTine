@@ -6,16 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     cursor.style.top = `${y}px`;
   }
 
-  // Mouse/touch for cursor movement
+  // Mouse & touch for cursor
   document.addEventListener('mousemove', (e) => moveCursor(e.clientX, e.clientY));
-  document.addEventListener(
-    'touchmove',
-    (e) => {
-      e.preventDefault();
-      moveCursor(e.touches[0].clientX, e.touches[0].clientY);
-    },
-    { passive: false }
-  );
+  // IMPORTANT: No preventDefault here so envelope can also get taps
+  document.addEventListener('touchmove', (e) => {
+    moveCursor(e.touches[0].clientX, e.touches[0].clientY);
+  });
 
   // --- 2) Sparkle on click/touch ---
   function addSparkle(x, y) {
@@ -27,25 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => sparkle.remove(), 700);
   }
   document.addEventListener('click', (e) => addSparkle(e.clientX, e.clientY));
-  document.addEventListener(
-    'touchstart',
-    (e) => {
-      e.preventDefault();
-      addSparkle(e.touches[0].clientX, e.touches[0].clientY);
-    },
-    { passive: false }
-  );
+  // On touchstart, we do NOT preventDefault, so envelope can also get the tap
+  document.addEventListener('touchstart', (e) => {
+    addSparkle(e.touches[0].clientX, e.touches[0].clientY);
+  });
 
-  // --- 3) Animate the envelope + shadow with GSAP ---
-  // Slide envelope in from above
+  // --- 3) Envelope + shadow bounce with GSAP ---
   gsap.from('.envelope', {
     duration: 1.2,
     y: -60,
     opacity: 0,
     ease: 'power4.out'
   });
-
-  // Gentle bounce for envelope
   gsap.to('.envelope', {
     y: -10,
     duration: 2,
@@ -53,8 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
     yoyo: true,
     ease: 'sine.inOut'
   });
-
-  // Shadow compress/expand in sync
   gsap.to('.envelope-shadow', {
     scaleX: 0.85,
     duration: 2,
@@ -64,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transformOrigin: '50% 50%'
   });
 
-  // --- 4) Lazy-load hearts & bees (start once the letter is opened) ---
+  // --- 4) Hearts & Bees creation (start once the letter is opened) ---
   let heartsInterval = null;
   let beesInterval = null;
 
@@ -78,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
     element.style.left = `${Math.random() * 100}%`;
     element.style.animationDuration = `${Math.random() * 3 + 4}s`;
 
-    // Random color tweak for bees
     if (type === 'bee') {
       element.style.filter = `sepia(30%) hue-rotate(${
         Math.random() * 20 - 10
@@ -104,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- 5) Typed text setup (triggered once) ---
+  // --- 5) Typed text (triggered once) ---
   let typedStarted = false;
   function startTyped() {
     if (typedStarted) return;
@@ -132,13 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
     startHeartsAndBees();
   });
 
-  // Mobile single tap → toggle open letter
+  // Mobile single tap → open letter, trigger typed text + hearts/bees
   if (window.innerWidth < 600) {
     envelope.addEventListener('click', () => {
-      // Toggle the "hover" class (to open letter)
       envelope.classList.toggle('hover');
-
-      // Start typed text + hearts/bees
       startTyped();
       startHeartsAndBees();
     });

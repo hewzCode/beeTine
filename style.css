@@ -1,295 +1,299 @@
 :root {
-    --pink: #ffb7d5;
-    --dark-pink: #ff85b3;
-    --heart: #ff6b6b;
-    --cream: #fff5f0;
-    --text: #704c5e;
+  --pink: #ffb7d5;
+  --dark-pink: #ff85b3;
+  --heart: #ff6b6b;
+  --cream: #fff5f0;
+  --text: #704c5e;
+}
+
+/* Reset & base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  touch-action: manipulation;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--cream);
+  cursor: none; /* Custom cursor */
+  overflow: hidden;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    60deg,
+    rgba(255, 183, 213, 0.08) 0 50px,
+    transparent 50px 100px
+  );
+  z-index: 0;
+}
+
+/* Envelope container with enough space to bounce */
+.card-container {
+  position: relative;
+  z-index: 2;
+  width: min(340px, 90vw);
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Envelope shadow (GSAP will animate scaleX) */
+.envelope-shadow {
+  position: absolute;
+  width: 160px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) scaleX(1);
+  z-index: 1;
+}
+
+/* Envelope itself (centered near bottom) */
+.envelope {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(300px, 80vw);
+  height: calc(2/3 * min(300px, 80vw));
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+  z-index: 2;
+}
+
+/* Envelope front flap */
+.envelope .front {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, var(--pink), var(--dark-pink));
+  clip-path: polygon(0 0, 100% 0, 98% 95%, 50% 100%, 2% 95%);
+  z-index: 2;
+}
+
+/* Envelope back panel */
+.envelope .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: var(--dark-pink);
+  clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);
+  transform: translateY(4px);
+}
+
+/* Letter inside the envelope */
+.letter {
+  position: absolute;
+  width: 90%;
+  height: 80%;
+  background: linear-gradient(white 90%, #fff8f6);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  top: -20px;
+  left: 5%;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index: 1;
+  border: 2px dashed var(--pink);
+  overflow: hidden;
+}
+
+/* Dancing Script for typed text & small heart */
+.message,
+#typedText,
+.small-heart {
+  font-family: "Dancing Script", cursive !important;
+}
+
+/* Initially hidden typed text & heart */
+.message {
+  visibility: hidden;
+  font-size: clamp(1.2rem, 4vw, 1.7rem);
+  color: var(--text);
+  line-height: 1.4;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.small-heart {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  color: var(--heart);
+  visibility: hidden;
+  animation: heartbeat 1.4s infinite;
+}
+
+/* Desktop hover → open letter, show typed text */
+.envelope:hover {
+  transform: translate(-50%, -10px) rotate(-1.5deg);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
+}
+.envelope:hover .letter {
+  transform: translateY(-125px) rotate(-0.5deg);
+}
+.envelope:hover .message,
+.envelope:hover .small-heart {
+  visibility: visible;
+}
+
+/* Mobile single-tap → toggles .hover class for same effect */
+.envelope.hover {
+  transform: translate(-50%, -10px) rotate(-1.5deg);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
+}
+.envelope.hover .letter {
+  transform: translateY(-125px) rotate(-0.5deg);
+}
+.envelope.hover .message,
+.envelope.hover .small-heart {
+  visibility: visible;
+}
+
+/* Heartbeat animation for the small heart */
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
   }
-  
-  /* Reset & base */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    touch-action: manipulation;
+  50% {
+    transform: scale(1.15);
   }
-  
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: var(--cream);
-    cursor: none; /* Using a custom cursor */
-    overflow: hidden;
-    position: relative;
-    -webkit-tap-highlight-color: transparent;
+}
+
+/* Floating hearts & bees */
+.floating-hearts span,
+.floating-bees span {
+  position: absolute;
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  opacity: 0;
+  user-select: none;
+}
+
+/* Hearts floating */
+@keyframes float {
+  0% {
+    transform: translateY(110vh) scale(0.6);
+    opacity: 0;
   }
-  
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: repeating-linear-gradient(
-      60deg,
-      rgba(255, 183, 213, 0.08) 0 50px,
-      transparent 50px 100px
-    );
-    z-index: 0;
+  20% {
+    opacity: 0.8;
   }
-  
-  /* 
-     The card-container is sized so the envelope 
-     can "float" in the middle. 
-  */
+  100% {
+    transform: translateY(-120vh) scale(1.1);
+    opacity: 0;
+  }
+}
+.floating-hearts span {
+  animation: float 7s ease-in infinite;
+  filter: hue-rotate(-10deg) saturate(0.8);
+}
+
+/* Bees floating */
+@keyframes beeFloat {
+  0% {
+    transform: translateY(110vh) rotate(0deg) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-120vh) rotate(360deg) scale(1.1);
+    opacity: 0;
+  }
+}
+.floating-bees span {
+  animation: beeFloat 9s linear infinite;
+  filter: sepia(30%) hue-rotate(-10deg) saturate(0.7);
+}
+
+/* Custom heart cursor */
+.heart-cursor {
+  width: 24px;
+  height: 24px;
+  background: var(--heart);
+  position: fixed;
+  pointer-events: none;
+  transform: rotate(45deg) translate(-50%, -50%);
+  left: -100px;
+  top: -100px;
+  transition: transform 0.1s;
+}
+.heart-cursor::before,
+.heart-cursor::after {
+  content: "";
+  width: 24px;
+  height: 24px;
+  background: var(--heart);
+  position: absolute;
+  border-radius: 50%;
+}
+.heart-cursor::before {
+  top: -12px;
+  left: 0;
+}
+.heart-cursor::after {
+  left: -12px;
+  top: 0;
+}
+
+/* Sparkle on click/touch */
+.sparkle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  animation: sparklePop 0.7s ease-out;
+}
+@keyframes sparklePop {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
   .card-container {
-    position: relative;
-    z-index: 2;
-    width: min(340px, 90vw);
-    height: 60vh; /* Enough space to bounce */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    height: 50vh;
   }
-  
-  /* Envelope shadow (no separate CSS animation; we use GSAP) */
-  .envelope-shadow {
-    position: absolute;
-    width: 160px;
-    height: 20px;
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 50%;
-    bottom: 0;       /* pinned to bottom of container */
-    left: 50%;
-    transform: translateX(-50%) scaleX(1); /* default scaleX(1) */
-    z-index: 1;
-  }
-  
-  /* Envelope itself (centered horizontally, near bottom) */
   .envelope {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(300px, 80vw);
-    height: calc(2/3 * min(300px, 80vw));
-    transition: all 0.3s ease;
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
-    z-index: 2; /* above the shadow */
-  }
-  
-  /* Envelope front flap */
-  .envelope .front {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(145deg, var(--pink), var(--dark-pink));
-    clip-path: polygon(0 0, 100% 0, 98% 95%, 50% 100%, 2% 95%);
-    z-index: 2;
-  }
-  
-  /* Envelope back */
-  .envelope .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: var(--dark-pink);
-    clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);
-    transform: translateY(4px);
-  }
-  
-  /* Letter inside envelope */
-  .letter {
-    position: absolute;
-    width: 90%;
-    height: 80%;
-    background: linear-gradient(white 90%, #fff8f6);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    top: -20px;
-    left: 5%;
-    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    z-index: 1;
-    border: 2px dashed var(--pink);
-    overflow: hidden;
-  }
-  
-  /* Use Dancing Script for typed text & small heart */
-  .message,
-  #typedText,
-  .small-heart {
-    font-family: "Dancing Script", cursive !important;
-  }
-  
-  /* Hide typed text & heart until envelope is hovered/tapped */
-  .message {
-    visibility: hidden;
-    font-size: clamp(1.2rem, 4vw, 1.7rem);
-    color: var(--text);
-    line-height: 1.4;
-    text-align: center;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  .small-heart {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    font-size: clamp(1.2rem, 4vw, 1.6rem);
-    animation: heartbeat 1.4s infinite;
-    color: var(--heart);
-    visibility: hidden;
-  }
-  
-  /* Envelope hover effect & show letter content */
-  .envelope:hover {
-    transform: translate(-50%, -10px) rotate(-1.5deg);
-    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
+    width: min(280px, 80vw);
+    height: calc(2/3 * min(280px, 80vw));
   }
   .envelope:hover .letter {
-    transform: translateY(-125px) rotate(-0.5deg);
+    transform: translateY(-110px) rotate(-0.5deg);
   }
-  .envelope:hover .message,
-  .envelope:hover .small-heart {
-    visibility: visible;
+  .message {
+    font-size: 1.4rem;
   }
-  
-  /* Animations for hearts and bees */
-  .floating-hearts span,
-  .floating-bees span {
-    position: absolute;
-    font-size: clamp(1.2rem, 4vw, 1.6rem);
-    opacity: 0;
-    user-select: none;
-  }
-  
-  @keyframes float {
-    0% {
-      transform: translateY(110vh) scale(0.6);
-      opacity: 0;
-    }
-    20% {
-      opacity: 0.8;
-    }
-    100% {
-      transform: translateY(-120vh) scale(1.1);
-      opacity: 0;
-    }
-  }
-  
-  @keyframes beeFloat {
-    0% {
-      transform: translateY(110vh) rotate(0deg) scale(0.8);
-      opacity: 0;
-    }
-    20% {
-      opacity: 0.7;
-    }
-    100% {
-      transform: translateY(-120vh) rotate(360deg) scale(1.1);
-      opacity: 0;
-    }
-  }
-  
-  .floating-hearts span {
-    animation: float 7s ease-in infinite;
-    filter: hue-rotate(-10deg) saturate(0.8);
-  }
-  
-  .floating-bees span {
-    animation: beeFloat 9s linear infinite;
-    filter: sepia(30%) hue-rotate(-10deg) saturate(0.7);
-  }
-  
-  /* Heartbeat for the small heart */
-  @keyframes heartbeat {
-    0%,
-    100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.15);
-    }
-  }
-  
-  /* Custom heart cursor */
-  .heart-cursor {
-    width: 24px;
-    height: 24px;
-    background: var(--heart);
-    position: fixed;
-    pointer-events: none;
-    transform: rotate(45deg) translate(-50%, -50%);
-    left: -100px;
-    top: -100px;
-    transition: transform 0.1s;
-  }
-  .heart-cursor::before,
-  .heart-cursor::after {
-    content: "";
-    width: 24px;
-    height: 24px;
-    background: var(--heart);
-    position: absolute;
-    border-radius: 50%;
-  }
-  .heart-cursor::before {
-    top: -12px;
-    left: 0;
-  }
-  .heart-cursor::after {
-    left: -12px;
-    top: 0;
-  }
-  
-  /* Sparkle effect on click/touch */
-  .sparkle {
-    position: absolute;
-    width: 7px;
-    height: 7px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
-    animation: sparklePop 0.7s ease-out;
-  }
-  
-  @keyframes sparklePop {
-    0% {
-      transform: scale(0);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(2.5);
-      opacity: 0;
-    }
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 600px) {
-    .card-container {
-      height: 50vh;
-    }
-    .envelope {
-      width: min(280px, 80vw);
-      height: calc(2/3 * min(280px, 80vw));
-    }
-    .envelope:hover .letter {
-      transform: translateY(-110px) rotate(-0.5deg);
-    }
-    .message {
-      font-size: 1.4rem;
-    }
-  }
-  
-  /* Allow pointer events on envelope but not the background hearts/bees */
-  body * {
-    pointer-events: none;
-  }
-  .envelope,
-  .envelope * {
-    pointer-events: auto;
-  }
-  
+}
+
+/* Let the envelope be clickable, ignoring hearts/bees behind */
+body * {
+  pointer-events: none;
+}
+.envelope,
+.envelope * {
+  pointer-events: auto;
+}
